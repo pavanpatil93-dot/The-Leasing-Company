@@ -1527,7 +1527,61 @@ export default function App() {
     }
   };
 
-  if (isClientCatalogView) {
+  if (!isClientCatalogView && !user) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center p-4 ${darkMode ? 'bg-[#121619] text-white' : 'bg-[#F8F7F4] text-[#121619]'}`}>
+        <div className={`w-full max-w-md rounded-3xl p-8 shadow-xl border ${darkMode ? 'bg-[#1E2429] border-gray-800' : 'bg-white border-gray-100'}`}>
+          <div className="flex flex-col items-center mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-[#E96932] flex items-center justify-center text-white mb-3 shadow-md">
+              <Building2 className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">The Leasing Company</h1>
+            <p className="text-sm opacity-70 mt-1">Employee Portal</p>
+          </div>
+          {loginError && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{loginError}</span>
+            </div>
+          )}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1.5">Login ID</label>
+              <input
+                type="text"
+                value={loginId}
+                onChange={(e) => setLoginId(e.target.value)}
+                placeholder="e.g. EMP-001"
+                required
+                className={`w-full px-4 py-3 rounded-xl border text-base outline-none focus:ring-2 focus:ring-[#E96932] ${darkMode ? 'bg-[#121619] border-gray-700 text-white' : 'bg-[#F8F7F4] border-gray-200 text-[#121619]'}`}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider opacity-70 mb-1.5">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                required
+                className={`w-full px-4 py-3 rounded-xl border text-base outline-none focus:ring-2 focus:ring-[#E96932] ${darkMode ? 'bg-[#121619] border-gray-700 text-white' : 'bg-[#F8F7F4] border-gray-200 text-[#121619]'}`}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full py-3.5 rounded-xl bg-[#E96932] hover:bg-[#d55a25] text-white font-semibold flex items-center justify-center gap-2 transition disabled:opacity-60"
+            >
+              {isLoggingIn ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+              {isLoggingIn ? 'Signing In...' : 'Sign In'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+ if (isClientCatalogView) {
+                 
     const catalogProperties = inventoryList.filter(i => catalogIds.includes(i.id));
     return (
       <div className={`min-h-screen ${darkMode ? 'bg-[#121619] text-white' : 'bg-[#F8F7F4] text-[#121619]'} p-4 sm:p-8 font-sans`}>
