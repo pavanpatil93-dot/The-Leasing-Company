@@ -915,19 +915,36 @@ export default function App() {
     const loginUrl = `/api/gas?tabName=${encodeURIComponent(tabName)}&action=get`;
 
     try {
-      const response = await fetch(loginUrl, { method: 'GET' });
+      const response = await fetch(loginUrl, { method: 'GET', cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error(`Employees data request failed (HTTP ${response.status}). Please check the Google Apps Script deployment.`);
+      }
       const json = await response.json();
+      if (json?.status && !['OK', 'success'].includes(String(json.status).toLowerCase()) && String(json.status).toUpperCase() !== 'OK') {
+        throw new Error('Employees data source returned an error. Check the Google Apps Script deployment and sheet access.');
+      }
 
       let employeesMatrix: any[][] = [];
-      if (json && json.status === 'OK' && json.data) {
+      if (json?.data && typeof json.data === 'object') {
         employeesMatrix = findTabMatrix(json.data, 'employees', 'employee', 'staff', 'team', 'login');
       } else if (Array.isArray(json)) {
         employeesMatrix = json;
+      } else if (Array.isArray(json?.data)) {
+        employeesMatrix = json.data;
+      }
+      if (!employeesMatrix.length) {
+        throw new Error('Employees tab is missing or empty in the Google Apps Script response.');
+      }
+      if (!Array.isArray(employeesMatrix[0])) {
+        throw new Error('Employees tab has an unsupported format; expected a header row followed by employee rows.');
+      }
+      if (employeesMatrix.length < 2) {
+        throw new Error('Employees tab has no employee records.');
       }
 
       const employees = parseMatrixToObjects(employeesMatrix, 'Employee');
       const matchedEmp = employees.find((emp: any) => {
-        const id = String(getVal(emp, 'login id', 'loginid', 'email', 'id', 'username') || '').trim().toLowerCase();
+        const id = String(getVal(emp, 'login id', 'loginid', 'email', 'username', 'id') || '').trim().toLowerCase();
         const pass = String(getVal(emp, 'password', 'pass', 'pwd') || '').trim();
         return id === loginId.trim().toLowerCase() && pass === password.trim();
       });
@@ -946,7 +963,7 @@ export default function App() {
         showToast('Login successful!');
       } else {
         setLoginError('Invalid Login ID or Password. Please check Employees sheet.');
-        setResponseAlert(`Employees tab response snippet: ${JSON.stringify(json).slice(0, 300)}`);
+        setResponseAlert('Employee credentials did not match a row in the Employees tab. Check the Login ID and Password columns.');
       }
     } catch (err: any) {
       console.error('Login error:', err);
