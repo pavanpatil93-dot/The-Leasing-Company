@@ -1,0 +1,6 @@
+{
+  "name": "The Leasing Company",
+  "description": "Mobile-first PWA for real estate team on iPhones. Inventory, CRM, WhatsApp AI Parser, and Broker Directory connected to Google Apps Script.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
